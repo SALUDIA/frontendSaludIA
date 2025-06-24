@@ -1,0 +1,227 @@
+<div class="flex flex-col h-screen bg-gradient-to-br from-blue-50 to-sky-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-4xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <!-- Logo y título -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center">
+            <img
+              src="/assets/images/logo/logo.png"
+              alt="SaludIA"
+              class="w-12 h-12"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
+            />
+            <span class="text-primary-500 text-2xl hidden">🏥</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-gray-800">SaludIA</h1>
+            <p class="text-sm text-gray-500">Asistente Médico Virtual</p>
+          </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="flex items-center space-x-2">
+          <button
+            (click)="openConfig()"
+            class="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Configuración"
+          >
+            ⚙️
+          </button>
+
+          <button
+            (click)="clearChat()"
+            class="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Limpiar chat"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <!-- Info usuario -->
+      <div class="mt-2 flex items-center space-x-4 text-sm text-gray-600">
+        <span>📅 {{ userConfig.age }} años</span>
+        <span>👤 {{ userConfig.gender }}</span>
+        <!-- 🆕 Indicador de política aceptada -->
+        <span *ngIf="acceptsPrivacyPolicy" class="text-green-600 flex items-center space-x-1">
+          <span>✅</span>
+          <span>Política aceptada</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Chat Messages -->
+  <div class="flex-1 overflow-hidden">
+    <div
+      id="chat-messages"
+      class="h-full overflow-y-auto scrollbar-thin p-4 space-y-4 max-w-4xl mx-auto"
+    >
+      <div
+        *ngFor="let message of messages; trackBy: trackByFn"
+        class="flex"
+        [class.justify-end]="message.isUser"
+        [class.justify-start]="!message.isUser"
+      >
+        <div
+          class="chat-message"
+          [class.user-message]="message.isUser"
+          [class.bot-message]="!message.isUser"
+        >
+          <div class="flex items-start space-x-2">
+            <div
+              class="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
+              [class.bg-primary-600]="message.isUser"
+              [class.bg-medical-500]="!message.isUser"
+            >
+              <span class="text-white">
+                {{ message.isUser ? "👤" : "🤖" }}
+              </span>
+            </div>
+
+            <div class="flex-1">
+              <div class="prose prose-sm max-w-none">
+                <pre class="whitespace-pre-wrap font-sans text-sm leading-relaxed">{{ message.content }}</pre>
+              </div>
+
+              <div class="text-xs mt-2 opacity-70">
+                {{ message.timestamp | date : "HH:mm" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading indicator -->
+      <div *ngIf="isLoading" class="flex justify-start">
+        <div class="bot-message chat-message">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-full bg-medical-500 flex items-center justify-center">
+              <span class="text-white text-sm">🤖</span>
+            </div>
+            <div class="flex space-x-1">
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+              <div
+                class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                style="animation-delay: 0.1s"
+              ></div>
+              <div
+                class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                style="animation-delay: 0.2s"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="bg-white border-t border-gray-200 p-4">
+    <div class="max-w-4xl mx-auto">
+      <div
+        *ngIf="error"
+        class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
+      >
+        <p class="text-red-700 text-sm">❌ {{ error }}</p>
+      </div>
+
+      <!-- 🆕 Checkbox de Política de Privacidad -->
+      <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg privacy-checkbox">
+        <label class="flex items-start space-x-3 cursor-pointer">
+          <input
+            type="checkbox"
+            [checked]="acceptsPrivacyPolicy"
+            (change)="onPrivacyPolicyChange($event)"
+            class="mt-1 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+          />
+          <div class="flex-1 privacy-text">
+            <span class="text-sm text-gray-700">
+              <strong>Acepto el uso de mis datos</strong> para el desarrollo de modelos de IA según nuestra
+              <a href="#" class="text-primary-600 hover:text-primary-700 underline">política de privacidad</a>.
+            </span>
+            <p class="text-xs text-gray-500 mt-1">
+              ⚠️ Este consentimiento es obligatorio para usar SaludIA
+            </p>
+          </div>
+        </label>
+      </div>
+
+      <form
+        [formGroup]="messageForm"
+        (ngSubmit)="onSendMessage()"
+        class="flex space-x-2"
+      >
+        <div class="flex-1">
+          <textarea
+            formControlName="symptoms"
+            placeholder="Describe tus síntomas detalladamente..."
+            rows="3"
+            class="input-field resize-none"
+            [class.error]="
+              messageForm.get('symptoms')?.invalid &&
+              messageForm.get('symptoms')?.touched
+            "
+            [class.opacity-50]="!acceptsPrivacyPolicy"
+            [class.cursor-not-allowed]="!acceptsPrivacyPolicy"
+            (keydown)="onKeyPress($event)"
+            [disabled]="isLoading || !acceptsPrivacyPolicy"
+            [placeholder]="acceptsPrivacyPolicy
+              ? 'Describe tus síntomas detalladamente...'
+              : 'Primero debes aceptar la política de privacidad'"
+          >
+          </textarea>
+
+          <!-- Mensajes de error -->
+          <div
+            *ngIf="symptomsError && messageForm.get('symptoms')?.touched"
+            class="text-red-500 text-sm mt-1"
+          >
+            {{ symptomsError }}
+          </div>
+
+          <!-- 🆕 Mensaje cuando no acepta política -->
+          <div
+            *ngIf="!acceptsPrivacyPolicy && messageForm.get('symptoms')?.value"
+            class="text-amber-600 text-sm mt-1 flex items-center space-x-1"
+          >
+            <span>⚠️</span>
+            <span>Debes aceptar la política de privacidad para continuar</span>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="!canSendMessage"
+          class="btn-primary px-6 self-start"
+          [class.opacity-50]="!canSendMessage"
+          [class.cursor-not-allowed]="!canSendMessage"
+        >
+          <span *ngIf="!isLoading">Enviar 📤</span>
+          <span *ngIf="isLoading">⏳</span>
+        </button>
+      </form>
+
+      <!-- 🔄 Actualizar el texto de ayuda -->
+      <div class="mt-2 text-xs text-gray-500 text-center">
+        <span *ngIf="acceptsPrivacyPolicy">
+          💡 Presiona <kbd class="px-1 py-0.5 bg-gray-100 rounded">Enter</kbd> para enviar
+        </span>
+        <span *ngIf="!acceptsPrivacyPolicy" class="text-amber-600">
+          📋 Acepta la política de privacidad para comenzar
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de configuración -->
+  <app-user-config
+    [isVisible]="showConfig"
+    [userConfig]="userConfig"
+    (configChange)="onConfigChange($event)"
+    (close)="closeConfig()"
+  >
+  </app-user-config>
+</div>

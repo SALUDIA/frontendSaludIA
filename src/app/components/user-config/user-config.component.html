@@ -1,0 +1,85 @@
+<!-- Modal de configuración -->
+<div *ngIf="isVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">
+        ⚙️ Configuración de Usuario
+      </h2>
+      <button
+        (click)="onClose()"
+        class="text-gray-400 hover:text-gray-600 text-xl font-bold">
+        ×
+      </button>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
+      <!-- Edad -->
+      <div class="mb-4">
+        <label for="age" class="block text-sm font-medium text-gray-700 mb-2">
+          📅 Edad
+        </label>
+        <input
+          id="age"
+          type="number"
+          formControlName="age"
+          placeholder="Ingresa tu edad"
+          min="1"
+          max="120"
+          class="input-field"
+          [class.border-red-500]="configForm.get('age')?.invalid && configForm.get('age')?.touched">
+        <div *ngIf="ageError && configForm.get('age')?.touched"
+             class="text-red-500 text-sm mt-1">
+          {{ ageError }}
+        </div>
+      </div>
+
+      <!-- Género -->
+      <div class="mb-6">
+        <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">
+          👤 Género
+        </label>
+        <select
+          id="gender"
+          formControlName="gender"
+          class="input-field"
+          [class.border-red-500]="configForm.get('gender')?.invalid && configForm.get('gender')?.touched">
+          <option value="">Selecciona tu género</option>
+          <option *ngFor="let option of genderOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        <div *ngIf="genderError && configForm.get('gender')?.touched"
+             class="text-red-500 text-sm mt-1">
+          {{ genderError }}
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3">
+        <button
+          type="button"
+          (click)="onClose()"
+          class="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="configForm.invalid"
+          class="flex-1 btn-primary">
+          Guardar
+        </button>
+      </div>
+    </form>
+
+    <!-- Información actual -->
+    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+      <p class="text-sm text-gray-600">
+        <strong>Configuración actual:</strong><br>
+        📅 Edad: {{ userConfig.age }} años<br>
+        👤 Género: {{ userConfig.gender }}
+      </p>
+    </div>
+  </div>
+</div>
