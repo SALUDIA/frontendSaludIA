@@ -17,20 +17,22 @@ import { UserConfigComponent } from '../user-config/user-config.component';
 export class ChatbotComponent implements OnInit {
   messages: ChatMessage[] = [];
   messageForm: FormGroup;
-  userConfig: UserConfig = { age: 25, gender: 'Masculino' };
+  userConfig: UserConfig = { age: 25, gender: 'Female' };
   isLoading = false;
   showConfig = false;
   error: string | null = null;
-
-  // 🆕 Nueva variable para el checkbox
   acceptsPrivacyPolicy = false;
+  isTyping = false;
 
   constructor(
     private fb: FormBuilder,
     private medicalService: MedicalService
   ) {
     this.messageForm = this.fb.group({
-      symptoms: ['', [Validators.required, Validators.minLength(10)]]
+      symptoms: [
+        { value: '', disabled: true },
+        [Validators.required, Validators.minLength(10)]
+      ]
     });
   }
 
@@ -38,18 +40,20 @@ export class ChatbotComponent implements OnInit {
     this.addWelcomeMessage();
   }
 
-  // 🆕 Método para manejar el cambio del checkbox
   onPrivacyPolicyChange(event: Event) {
     const target = event.target as HTMLInputElement;
     this.acceptsPrivacyPolicy = target.checked;
 
-    // Si desmarcan el checkbox, limpiar el textarea
-    if (!this.acceptsPrivacyPolicy) {
-      this.messageForm.get('symptoms')?.setValue('');
+    const symptomsControl = this.messageForm.get('symptoms');
+
+    if (this.acceptsPrivacyPolicy && !this.isLoading) {
+      symptomsControl?.enable();
+    } else {
+      symptomsControl?.disable();
+      symptomsControl?.setValue('');
     }
   }
 
-  // 🆕 Getter para verificar si se puede enviar
   get canSendMessage(): boolean {
     return this.messageForm.valid && this.acceptsPrivacyPolicy && !this.isLoading;
   }
@@ -73,7 +77,7 @@ export class ChatbotComponent implements OnInit {
       };
       this.messages.push(userMessage);
 
-      this.messageForm.reset();
+      this.messageForm.get('symptoms')?.setValue('');
       this.sendPredictionRequest(symptoms);
       this.scrollToBottom();
     }
@@ -88,44 +92,72 @@ export class ChatbotComponent implements OnInit {
 
   private sendPredictionRequest(symptoms: string) {
     this.isLoading = true;
+    this.isTyping = true;
     this.error = null;
+
+    this.messageForm.get('symptoms')?.disable();
 
     const request = {
       symptoms: symptoms,
       age: this.userConfig.age,
-      gender: this.userConfig.gender
+      gender: this.userConfig.gender,
+      model: 'v8'
     };
 
     this.medicalService.predictDisease(request).subscribe({
       next: (response: PredictionResponse) => {
-        this.handlePredictionResponse(response);
-        this.isLoading = false;
+        setTimeout(() => {
+          this.handlePredictionResponse(response);
+          this.isLoading = false;
+          this.isTyping = false;
+
+          if (this.acceptsPrivacyPolicy) {
+            this.messageForm.get('symptoms')?.enable();
+          }
+        }, 2000);
       },
       error: (error) => {
-        this.error = error.message;
-        this.isLoading = false;
-        console.error('Error en predicción:', error);
+        setTimeout(() => {
+          this.error = error.message;
+          this.isLoading = false;
+          this.isTyping = false;
+
+          if (this.acceptsPrivacyPolicy) {
+            this.messageForm.get('symptoms')?.enable();
+          }
+          console.error('Error en predicción:', error);
+        }, 1000);
       }
     });
   }
 
+  // 🎯 SOLO MOSTRAR DIAGNÓSTICO Y RECOMENDACIONES
   private handlePredictionResponse(response: PredictionResponse) {
-    let botContent = `🏥 **Análisis Médico Completado**\n\n`;
+    let botContent = '';
 
-    if (response.success) {
-      botContent += `**Diagnóstico Principal:** ${response.main_diagnosis}\n`;
-      botContent += `**Nivel de Confianza:** ${response.confidence_level} (${response.confidence.toFixed(1)}%)\n\n`;
+    if (response.success && response.result) {
+      const result = response.result;
 
-      if (response.top_predictions && response.top_predictions.length > 0) {
-        botContent += `**Posibles Diagnósticos:**\n`;
-        response.top_predictions.forEach((pred, index) => {
-          botContent += `${index + 1}. ${pred.disease} - ${pred.probability.toFixed(1)}%\n`;
-        });
+      // 🩺 DIAGNÓSTICO
+      if (result.diagnostico) {
+        botContent += `🩺 **DIAGNÓSTICO**\n`;
+        botContent += `${result.diagnostico}\n\n`;
       }
 
-      botContent += `\n⚠️ **Importante:** Esta es una evaluación automatizada. Consulta con un médico profesional para un diagnóstico definitivo.`;
+      // 💡 RECOMENDACIONES
+      if (result.recomendaciones && result.recomendaciones.length > 0) {
+        botContent += `💡 **RECOMENDACIONES**\n`;
+        result.recomendaciones.forEach((rec, index) => {
+          botContent += `${index + 1}. ${rec}\n`;
+        });
+        botContent += `\n`;
+      }
+
+      // ⚠️ DISCLAIMER
+      botContent += `⚠️ **Importante:** Esta es una evaluación automatizada. Consulta con un médico profesional para un diagnóstico definitivo.`;
+
     } else {
-      botContent += `❌ No se pudo procesar tu consulta. Intenta reformular tus síntomas.`;
+      botContent = `❌ **Error en el Análisis**\n\nNo se pudo procesar tu consulta. Por favor:\n\n1. Verifica que hayas descrito tus síntomas claramente\n2. Intenta reformular tu consulta\n3. Si el problema persiste, contacta al soporte técnico`;
     }
 
     const botMessage: ChatMessage = {
@@ -144,7 +176,7 @@ export class ChatbotComponent implements OnInit {
       id: this.generateId(),
       content: `¡Hola! Soy tu asistente médico virtual SaludIA 🏥
 
-Puedo ayudarte a obtener información sobre posibles diagnósticos basados en tus síntomas.
+Puedo ayudarte a obtener información sobre posibles diagnósticos basados en tus síntomas usando nuestro modelo de IA **v8**.
 
 Para comenzar:
 1. ✅ Acepta la política de privacidad
@@ -169,7 +201,8 @@ Para comenzar:
   clearChat() {
     this.messages = [];
     this.error = null;
-    this.messageForm.reset();
+    this.isTyping = false;
+    this.messageForm.get('symptoms')?.setValue('');
     this.addWelcomeMessage();
   }
 

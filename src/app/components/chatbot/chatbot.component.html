@@ -16,7 +16,7 @@
           </div>
           <div>
             <h1 class="text-xl font-bold text-gray-800">SaludIA</h1>
-            <p class="text-sm text-gray-500">Asistente Médico Virtual</p>
+            <p class="text-sm text-gray-500">Asistente Médico Virtual v8</p>
           </div>
         </div>
 
@@ -44,7 +44,6 @@
       <div class="mt-2 flex items-center space-x-4 text-sm text-gray-600">
         <span>📅 {{ userConfig.age }} años</span>
         <span>👤 {{ userConfig.gender }}</span>
-        <!-- 🆕 Indicador de política aceptada -->
         <span *ngIf="acceptsPrivacyPolicy" class="text-green-600 flex items-center space-x-1">
           <span>✅</span>
           <span>Política aceptada</span>
@@ -94,8 +93,29 @@
         </div>
       </div>
 
+      <!-- Animación de escribiendo -->
+      <div *ngIf="isTyping" class="flex justify-start">
+        <div class="bot-message chat-message">
+          <div class="flex items-start space-x-2">
+            <div class="w-8 h-8 rounded-full bg-medical-500 flex items-center justify-center">
+              <span class="text-white text-sm">🤖</span>
+            </div>
+            <div class="flex-1">
+              <div class="typing-indicator">
+                <div class="typing-text">SaludIA está escribiendo</div>
+                <div class="typing-dots">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Loading indicator -->
-      <div *ngIf="isLoading" class="flex justify-start">
+      <div *ngIf="isLoading && !isTyping" class="flex justify-start">
         <div class="bot-message chat-message">
           <div class="flex items-center space-x-2">
             <div class="w-8 h-8 rounded-full bg-medical-500 flex items-center justify-center">
@@ -128,7 +148,7 @@
         <p class="text-red-700 text-sm">❌ {{ error }}</p>
       </div>
 
-      <!-- 🆕 Checkbox de Política de Privacidad -->
+      <!-- Checkbox de Política de Privacidad -->
       <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg privacy-checkbox">
         <label class="flex items-start space-x-3 cursor-pointer">
           <input
@@ -157,17 +177,13 @@
         <div class="flex-1">
           <textarea
             formControlName="symptoms"
-            placeholder="Describe tus síntomas detalladamente..."
             rows="3"
-            class="input-field resize-none"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none input-field"
             [class.error]="
               messageForm.get('symptoms')?.invalid &&
               messageForm.get('symptoms')?.touched
             "
-            [class.opacity-50]="!acceptsPrivacyPolicy"
-            [class.cursor-not-allowed]="!acceptsPrivacyPolicy"
             (keydown)="onKeyPress($event)"
-            [disabled]="isLoading || !acceptsPrivacyPolicy"
             [placeholder]="acceptsPrivacyPolicy
               ? 'Describe tus síntomas detalladamente...'
               : 'Primero debes aceptar la política de privacidad'"
@@ -182,7 +198,7 @@
             {{ symptomsError }}
           </div>
 
-          <!-- 🆕 Mensaje cuando no acepta política -->
+          <!-- Mensaje cuando no acepta política -->
           <div
             *ngIf="!acceptsPrivacyPolicy && messageForm.get('symptoms')?.value"
             class="text-amber-600 text-sm mt-1 flex items-center space-x-1"
@@ -195,7 +211,7 @@
         <button
           type="submit"
           [disabled]="!canSendMessage"
-          class="btn-primary px-6 self-start"
+          class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors btn-primary self-start"
           [class.opacity-50]="!canSendMessage"
           [class.cursor-not-allowed]="!canSendMessage"
         >
@@ -204,7 +220,7 @@
         </button>
       </form>
 
-      <!-- 🔄 Actualizar el texto de ayuda -->
+      <!-- Texto de ayuda -->
       <div class="mt-2 text-xs text-gray-500 text-center">
         <span *ngIf="acceptsPrivacyPolicy">
           💡 Presiona <kbd class="px-1 py-0.5 bg-gray-100 rounded">Enter</kbd> para enviar

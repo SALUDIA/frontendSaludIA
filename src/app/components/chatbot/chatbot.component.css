@@ -28,6 +28,24 @@
 /* Estilos para mensajes del chat */
 .chat-message {
   animation: fadeIn 0.3s ease-in-out;
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.user-message {
+  background-color: #e2e8f0;
+  color: #475569;
+  margin-left: auto;
+  border: 1px solid #cbd5e1;
+}
+
+.bot-message {
+  background-color: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #74b9ff;
 }
 
 @keyframes fadeIn {
@@ -125,6 +143,72 @@ header {
   font-weight: 500;
 }
 
+/* Estilos para la animación de escribiendo */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  max-width: 200px;
+  animation: slideInUp 0.3s ease-out;
+}
+
+.typing-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 8px;
+  font-style: italic;
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background-color: #9ca3af;
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 200ms;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 400ms;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .chat-message {
@@ -138,6 +222,14 @@ header {
 
   .privacy-checkbox {
     margin: 0 -0.5rem;
+  }
+
+  .typing-indicator {
+    max-width: 160px;
+  }
+
+  .typing-text {
+    font-size: 0.75rem;
   }
 }
 
@@ -167,4 +259,19 @@ input[type="checkbox"]:focus {
 .bot-message a:hover,
 .privacy-text a:hover {
   color: #1d4ed8;
+}
+
+/* Colores para avatares */
+.bg-primary-600 {
+  background-color: #2563eb;
+}
+
+.bg-medical-500 {
+  background-color: #06b6d4;
+}
+
+/* Error styles */
+.error {
+  border-color: #ef4444 !important;
+  background-color: rgba(254, 242, 242, 0.9) !important;
 }

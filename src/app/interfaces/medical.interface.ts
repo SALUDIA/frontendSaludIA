@@ -1,53 +1,8 @@
-export interface PredictionRequest {
-  symptoms: string;
-  age: number;
-  gender: string;
-}
-
-export interface Disease {
-  disease: string;
-  probability: number;
-}
-
-export interface ProcessingInfo {
-  original_input: {
-    age: number;
-    gender: string;
-    symptoms: string;
-  };
-  processed_input: {
-    age_range: string;
-    normalized_gender: string;
-    translated_symptoms: string;
-  };
-  translation: {
-    confidence: number;
-    detected_language: string;
-    was_translated: boolean;
-  };
-}
-
-export interface PredictionResponse {
-  confidence: number;
-  confidence_level: string;
-  endpoint_type: string;
-  main_diagnosis: string;
-  model_version: string;
-  processed_symptoms: string;
-  processing_info: ProcessingInfo;
-  session_id: string;
-  success: boolean;
-  timestamp: string;
-  top_predictions: Disease[];
-  user_friendly: boolean;
-}
-
 export interface ChatMessage {
   id: string;
   content: string;
   isUser: boolean;
   timestamp: Date;
-  prediction?: PredictionResponse;
 }
 
 export interface UserConfig {
@@ -55,8 +10,54 @@ export interface UserConfig {
   gender: string;
 }
 
+// 🆕 Nueva interfaz para la request
+export interface PredictionRequest {
+  symptoms: string;
+  age: number;
+  gender: string;
+  model: string;
+}
+
+// 🆕 Nueva interfaz para la response
+export interface PredictionResponse {
+  success: boolean;
+  metadata: {
+    procesamiento: {
+      categorizacion_edad: string;
+      determinacion_genero: string;
+      recomendaciones_source: string;
+      traduccion_diagnostico: string;
+      traduccion_sintomas: string;
+    };
+  };
+  result: {
+    confianza: number;
+    diagnostico: string;
+    diagnostico_original: string;
+    edad_detectada: number;
+    genero_origen: string;
+    genero_usado: string;
+    logged_to_db: boolean;
+    modelo_usado: string;
+    rango_edad: string;
+    recomendaciones: string[];
+    sintomas_procesados: string;
+    timestamp: string;
+  };
+}
+
+// 🆕 Agregar las opciones de género que faltaban
 export const GENDER_OPTIONS = [
-  { value: 'Masculino', label: 'Masculino' },
-  { value: 'Femenino', label: 'Femenino' },
-  { value: 'Otro', label: 'Otro' }
+  { value: 'Male', label: 'Masculino' },
+  { value: 'Female', label: 'Femenino' },
+  { value: 'Other', label: 'Otro' }
+];
+
+// 🆕 Opciones de edad (si las necesitas)
+export const AGE_RANGES = [
+  { min: 0, max: 17, label: 'Menor de edad' },
+  { min: 18, max: 30, label: 'Joven adulto' },
+  { min: 31, max: 50, label: 'Adulto' },
+  { min: 51, max: 70, label: 'Adulto mayor' },
+  { min: 71, max: 120, label: 'Tercera edad' }
 ];
