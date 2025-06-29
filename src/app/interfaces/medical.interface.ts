@@ -10,12 +10,11 @@ export interface UserConfig {
   gender: string;
 }
 
-// 🆕 Nueva interfaz para la request
+// Nueva interfaz para la request v11
 export interface PredictionRequest {
   symptoms: string;
   age: number;
   gender: string;
-  model: string;
 }
 
 // 🆕 Nueva interfaz para la response

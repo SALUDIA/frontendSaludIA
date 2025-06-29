@@ -100,8 +100,7 @@ export class ChatbotComponent implements OnInit {
     const request = {
       symptoms: symptoms,
       age: this.userConfig.age,
-      gender: this.userConfig.gender,
-      model: 'v8'
+      gender: this.userConfig.gender
     };
 
     this.medicalService.predictDisease(request).subscribe({
@@ -176,7 +175,7 @@ export class ChatbotComponent implements OnInit {
       id: this.generateId(),
       content: `¡Hola! Soy tu asistente médico virtual SaludIA 🏥
 
-Puedo ayudarte a obtener información sobre posibles diagnósticos basados en tus síntomas usando nuestro modelo de IA **v8**.
+Puedo ayudarte a obtener información sobre posibles diagnósticos basados en tus síntomas usando nuestro modelo de IA **v11**.
 
 Para comenzar:
 1. ✅ Acepta la política de privacidad

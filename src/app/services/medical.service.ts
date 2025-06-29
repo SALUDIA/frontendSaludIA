@@ -12,18 +12,17 @@ export class MedicalService {
   private http = inject(HttpClient);
 
   /**
-   * Envía síntomas al endpoint de predicción con nuevo formato
+   * Envía síntomas al endpoint de predicción v11
    */
   predictDisease(request: PredictionRequest): Observable<PredictionResponse> {
-    // 🆕 Incluir el modelo en la request
+    // Formato simplificado sin campo model
     const requestBody = {
       symptoms: request.symptoms,
       age: request.age,
-      gender: request.gender,
-      model: request.model || 'v8' // Default a v8
+      gender: request.gender
     };
 
-    return this.http.post<PredictionResponse>(`${this.API_URL}/api/predict-friendly`, requestBody)
+    return this.http.post<PredictionResponse>(`${this.API_URL}/api/predict-v11`, requestBody)
       .pipe(
         timeout(this.REQUEST_TIMEOUT),
         catchError(this.handleError)
