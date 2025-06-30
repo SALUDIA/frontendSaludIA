@@ -17,7 +17,7 @@ import { UserConfigComponent } from '../user-config/user-config.component';
 export class ChatbotComponent implements OnInit {
   messages: ChatMessage[] = [];
   messageForm: FormGroup;
-  userConfig: UserConfig = { age: 25, gender: 'Female' };
+  userConfig: UserConfig = { age: 25, gender: 'Femenino' };
   isLoading = false;
   showConfig = false;
   error: string | null = null;
@@ -130,7 +130,7 @@ export class ChatbotComponent implements OnInit {
     });
   }
 
-  // 🎯 SOLO MOSTRAR DIAGNÓSTICO Y RECOMENDACIONES
+  // 🎯 SOLO MOSTRAR DIAGNÓSTICO
   private handlePredictionResponse(response: PredictionResponse) {
     let botContent = '';
 
@@ -141,15 +141,12 @@ export class ChatbotComponent implements OnInit {
       if (result.diagnostico) {
         botContent += `🩺 **DIAGNÓSTICO**\n`;
         botContent += `${result.diagnostico}\n\n`;
-      }
 
-      // 💡 RECOMENDACIONES
-      if (result.recomendaciones && result.recomendaciones.length > 0) {
-        botContent += `💡 **RECOMENDACIONES**\n`;
-        result.recomendaciones.forEach((rec, index) => {
-          botContent += `${index + 1}. ${rec}\n`;
-        });
-        botContent += `\n`;
+        // � INFORMACIÓN ADICIONAL
+        botContent += `📊 **Detalles del Análisis**\n`;
+        botContent += `• Confianza: ${result.confianza}%\n`;
+        botContent += `• Modelo utilizado: ${result.modelo_usado}\n`;
+        botContent += `• Rango de edad: ${result.rango_edad}\n\n`;
       }
 
       // ⚠️ DISCLAIMER

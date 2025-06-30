@@ -17,39 +17,27 @@ export interface PredictionRequest {
   gender: string;
 }
 
-// 🆕 Nueva interfaz para la response
+// 🆕 Nueva interfaz para la response v11
 export interface PredictionResponse {
   success: boolean;
-  metadata: {
-    procesamiento: {
-      categorizacion_edad: string;
-      determinacion_genero: string;
-      recomendaciones_source: string;
-      traduccion_diagnostico: string;
-      traduccion_sintomas: string;
-    };
-  };
   result: {
     confianza: number;
     diagnostico: string;
     diagnostico_original: string;
     edad_detectada: number;
-    genero_origen: string;
     genero_usado: string;
-    logged_to_db: boolean;
     modelo_usado: string;
     rango_edad: string;
-    recomendaciones: string[];
-    sintomas_procesados: string;
+    texto_procesado: string;
     timestamp: string;
   };
 }
 
-// 🆕 Agregar las opciones de género que faltaban
+// 🆕 Opciones de género actualizadas para enviar en español
 export const GENDER_OPTIONS = [
-  { value: 'Male', label: 'Masculino' },
-  { value: 'Female', label: 'Femenino' },
-  { value: 'Other', label: 'Otro' }
+  { value: 'Masculino', label: 'Masculino' },
+  { value: 'Femenino', label: 'Femenino' },
+  { value: 'Otro', label: 'Otro' }
 ];
 
 // 🆕 Opciones de edad (si las necesitas)
